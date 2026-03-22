@@ -31,7 +31,7 @@
             overflow: hidden;
         }
 
-        /* --- 侧边栏与控制台基础样式 --- */
+        /* --- 侧边栏与控制台 --- */
         .sidebar { width: 280px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.03); z-index: 10; }
         .sidebar-header { padding: 24px 20px; font-size: 1.3rem; font-weight: 600; color: var(--primary-color); border-bottom: 1px solid var(--border-color); text-align: center; letter-spacing: 1px; }
         .level-selector { display: flex; justify-content: space-around; padding: 15px; border-bottom: 1px solid var(--border-color); background: #fafbfc; }
@@ -65,64 +65,39 @@
         .card.playing { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2); background-color: var(--playing-bg); }
 
         /* 盲听模式模糊效果 */
-        .blind-mode .card-text { 
-            filter: blur(8px); 
-            opacity: 0.6; 
-            transition: all 0.3s ease; 
-        }
-        
-        /* 文本解盲后的清晰状态（确保可以划选复制） */
-        .blind-mode .card-text.revealed { 
-            filter: blur(0); 
-            opacity: 1; 
-            user-select: text; 
-        }
+        .blind-mode .card-text { filter: blur(8px); opacity: 0.6; transition: all 0.3s ease; }
+        .blind-mode .card-text.revealed { filter: blur(0); opacity: 1; user-select: text; }
 
-        /* 独立的解盲按钮样式（默认隐藏） */
-        .reveal-btn {
-            display: none;
-            background-color: #ffffff;
-            color: var(--text-light);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            transition: all 0.2s;
-            font-weight: 500;
-        }
-        .reveal-btn:hover {
-            background-color: #f1f5f9;
-            color: var(--text-main);
-            border-color: #cbd5e1;
-        }
-        
-        /* 只有在盲听模式开启时，解盲按钮才显示 */
-        .blind-mode .reveal-btn {
-            display: block;
-        }
+        .reveal-btn { display: none; background-color: #ffffff; color: var(--text-light); border: 1px solid var(--border-color); border-radius: 20px; cursor: pointer; font-size: 0.95rem; transition: all 0.2s; font-weight: 500; }
+        .reveal-btn:hover { background-color: #f1f5f9; color: var(--text-main); border-color: #cbd5e1; }
+        .blind-mode .reveal-btn { display: block; }
 
-        /* --- 视图布局调整 --- */
+        /* --- 排版核心：悬挂缩进 --- */
+        .card-text { flex: 1; font-size: 1.25rem; line-height: 1.8; color: var(--text-main); width: 100%; }
+        
+        /* 对话行布局：角色名不换行，内容自动缩进 */
+        .dialogue-row {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 2px;
+            margin-bottom: 4px;
+        }
+        .speaker-label { font-weight: bold; white-space: nowrap; }
+        .speaker-a { color: #e74c3c; }
+        .speaker-b { color: #3498db; }
+        .speaker-c { color: #27ae60; }
+
+        /* 普通陈述句布局 */
+        .narrative-row { margin-bottom: 8px; display: block; }
+
         .list-view { display: flex; flex-direction: column; gap: 16px; }
         .list-view .card { display: flex; align-items: flex-start; gap: 20px; }
         
         .single-view { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 50vh; }
-        .single-view .card { 
-            width: 100%; 
-            padding: 40px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: flex-start; 
-            gap: 20px; 
-        }
+        .single-view .card { width: 100%; padding: 40px; display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
         
-        /* 内部元素与排版颜色 */
         .card-left { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 80px; }
         .sentence-id { background: #f1f5f9; color: var(--text-light); padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; }
-        .card-text { flex: 1; font-size: 1.25rem; line-height: 1.8; color: var(--text-main); width: 100%; }
-        
-        .speaker-a { color: #e74c3c; font-weight: bold; }
-        .speaker-b { color: #3498db; font-weight: bold; }
-        .speaker-c { color: #27ae60; font-weight: bold; }
 
         .play-btn { background-color: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 0.95rem; width: 100px; transition: all 0.2s; font-weight: 500; }
         .play-btn:hover { background-color: var(--primary-dark); }
@@ -133,52 +108,47 @@
         .nav-btn { padding: 10px 24px; background: white; border: 1px solid var(--border-color); border-radius: 20px; cursor: pointer; font-size: 1rem; color: var(--text-main); transition: all 0.2s; }
         .nav-btn:hover:not(:disabled) { border-color: var(--primary-color); color: var(--primary-color); }
 
-        /* --- 抽卡模式专属样式 --- */
         .gacha-controls { display: flex; gap: 20px; margin-bottom: 30px; justify-content: center; width: 100%; }
         .gacha-btn { padding: 14px 30px; font-size: 1.1rem; border-radius: 30px; border: 2px solid var(--primary-color); background: white; color: var(--primary-color); cursor: pointer; transition: all 0.2s; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .gacha-btn:hover { background: var(--primary-color); color: white; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
-        .gacha-btn.blind-draw { border-color: var(--gacha-color); color: var(--gacha-color); }
-        .gacha-btn.blind-draw:hover { background: var(--gacha-color); color: white; }
-
+        .gacha-btn:hover { background: var(--primary-color); color: white; transform: translateY(-2px); }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
         <div class="sidebar-header">语料研习系统</div>
-        <div class="level-selector" id="levelSelector"></div>
-        <ul class="topic-list" id="topicList"></ul>
+        <div id="levelSelector" class="level-selector"></div>
+        <ul id="topicList" class="topic-list"></ul>
     </div>
 
     <div class="main-wrapper">
         <div class="control-panel">
             <div class="panel-group">
                 <div class="view-switch">
-                    <button class="view-btn active" id="btnViewList" onclick="switchView('list')">列表浏览</button>
-                    <button class="view-btn" id="btnViewSingle" onclick="switchView('single')">单句沉浸</button>
-                    <button class="view-btn" id="btnViewGacha" onclick="switchView('gacha')">🎲 抽卡模式</button>
+                    <button id="btnViewList" class="view-btn active" onclick="switchView('list')">列表浏览</button>
+                    <button id="btnViewSingle" class="view-btn" onclick="switchView('single')">单句沉浸</button>
+                    <button id="btnViewGacha" class="view-btn" onclick="switchView('gacha')">🎲 抽卡模式</button>
                 </div>
             </div>
             <div class="panel-group">
-                <button class="toggle-btn" id="btnBlind" onclick="toggleSetting('blind')">👁️ 盲听模式</button>
-                <button class="toggle-btn" id="btnAutoPlay" onclick="toggleSetting('autoPlay')">🔁 自动连播</button>
-                <button class="toggle-btn" id="btnRandom" onclick="toggleSetting('random')">🔀 随机播放</button>
+                <button id="btnBlind" class="toggle-btn" onclick="toggleSetting('blind')">👁️ 盲听模式</button>
+                <button id="btnAutoPlay" class="toggle-btn" onclick="toggleSetting('autoPlay')">🔁 自动连播</button>
+                <button id="btnRandom" class="toggle-btn" onclick="toggleSetting('random')">🔀 随机播放</button>
             </div>
         </div>
 
-        <div class="main-content" id="mainContent">
+        <div id="mainContent" class="main-content">
             <div class="content-wrapper">
                 <div class="content-header">
-                    <div class="header-title" id="currentSelectionTitle">选择专题</div>
-                    <div class="header-count" id="sentenceCount"></div>
+                    <div id="currentSelectionTitle" class="header-title">选择专题</div>
+                    <div id="sentenceCount" class="header-count"></div>
                 </div>
-                <div id="cardContainer" class="list-view"></div>
+                <div id="cardContainer"></div>
             </div>
         </div>
     </div>
 
     <script src="data.js"></script>
-    
     <script>
         let state = {
             level: 'N1',
@@ -189,7 +159,6 @@
             currentIndex: 0, 
             playingId: null
         };
-        
         let currentAudio = null;
         let gachaItem = null;
         let isGachaBlind = false;
@@ -200,10 +169,9 @@
         }
 
         function renderLevelSelectors() {
-            const levels = ['N1', 'N2', 'N3'];
             const container = document.getElementById('levelSelector');
             container.innerHTML = '';
-            levels.forEach(l => {
+            ['N1', 'N2', 'N3'].forEach(l => {
                 const btn = document.createElement('button');
                 btn.className = `level-btn ${l === state.level ? 'active' : ''}`;
                 btn.textContent = l;
@@ -216,14 +184,11 @@
             state.level = l;
             renderLevelSelectors();
             const topics = [...new Set(readingData.filter(d => d.level === l).map(d => d.topic))];
-            
             if (state.viewMode === 'gacha') {
                 drawGacha(isGachaBlind); 
-                renderTopicList(topics);
-                return;
+            } else if (topics.length > 0) {
+                selectTopic(topics[0]); 
             }
-            
-            if (topics.length > 0) selectTopic(topics[0]); 
             renderTopicList(topics);
         }
 
@@ -244,25 +209,14 @@
             state.filteredData = readingData.filter(d => d.level === state.level && d.topic === state.topic);
             state.currentIndex = 0; 
             stopAudio();
-
-            if (state.viewMode === 'gacha') {
-                switchView('single');
-            } else {
-                renderContent();
-            }
+            if (state.viewMode === 'gacha') switchView('single'); else renderContent();
         }
 
         function toggleSetting(key) {
             state.settings[key] = !state.settings[key];
-            const btn = document.getElementById(
-                key === 'blind' ? 'btnBlind' : 
-                key === 'autoPlay' ? 'btnAutoPlay' : 'btnRandom'
-            );
+            const btn = document.getElementById(key === 'blind' ? 'btnBlind' : key === 'autoPlay' ? 'btnAutoPlay' : 'btnRandom');
             btn.classList.toggle('active', state.settings[key]);
-            
-            if (key === 'blind' && state.viewMode !== 'gacha') {
-                document.getElementById('cardContainer').classList.toggle('blind-mode', state.settings.blind);
-            }
+            if (key === 'blind' && state.viewMode !== 'gacha') document.getElementById('cardContainer').classList.toggle('blind-mode', state.settings.blind);
         }
 
         function switchView(mode) {
@@ -271,216 +225,143 @@
             document.getElementById('btnViewList').classList.toggle('active', mode === 'list');
             document.getElementById('btnViewSingle').classList.toggle('active', mode === 'single');
             document.getElementById('btnViewGacha').classList.toggle('active', mode === 'gacha');
-            
-            const isGacha = mode === 'gacha';
-            document.getElementById('btnBlind').disabled = isGacha;
-            document.getElementById('btnAutoPlay').disabled = isGacha;
-            document.getElementById('btnRandom').disabled = isGacha;
-
+            document.getElementById('btnBlind').disabled = (mode === 'gacha');
+            document.getElementById('btnAutoPlay').disabled = (mode === 'gacha');
+            document.getElementById('btnRandom').disabled = (mode === 'gacha');
             stopAudio();
-
-            if (isGacha) {
-                drawGacha(false);
-            } else {
-                renderContent();
-            }
+            if (mode === 'gacha') drawGacha(false); else renderContent();
         }
 
-        // --- 核心播放逻辑 ---
         function stopAudio() {
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio.currentTime = 0;
-                currentAudio = null;
-            }
-            if (state.playingId) {
-                updatePlayingUI(state.playingId, false);
-                state.playingId = null;
-            }
+            if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; currentAudio = null; }
+            if (state.playingId) { updatePlayingUI(state.playingId, false); state.playingId = null; }
         }
 
         function playAudio(id, index) {
-            if (state.playingId === id && currentAudio && !currentAudio.paused) {
-                stopAudio(); 
-                return;
-            }
+            if (state.playingId === id && currentAudio && !currentAudio.paused) { stopAudio(); return; }
             stopAudio();
-
             state.playingId = id;
             if (state.viewMode !== 'gacha') state.currentIndex = index; 
-            
             updatePlayingUI(id, true);
-
             const audioPath = `./audio/${state.level}/T${id}.mp3`;
             currentAudio = new Audio(audioPath);
-            
-            currentAudio.play().catch(err => {
-                alert(`无法播放音频: ${audioPath}`);
-                stopAudio();
-            });
-
+            currentAudio.play().catch(() => { alert(`无法播放音频: ${audioPath}`); stopAudio(); });
             currentAudio.onended = () => {
-                updatePlayingUI(id, false);
-                state.playingId = null;
-                
-                if (state.viewMode !== 'gacha' && state.settings.autoPlay) {
-                    playNext(true); 
-                }
+                updatePlayingUI(id, false); state.playingId = null;
+                if (state.viewMode !== 'gacha' && state.settings.autoPlay) playNext(true); 
             };
         }
 
         function playNext(isAuto = false) {
             if (state.filteredData.length === 0 || state.viewMode === 'gacha') return;
-            
             let nextIndex = state.currentIndex;
             if (state.settings.random) {
-                do {
-                    nextIndex = Math.floor(Math.random() * state.filteredData.length);
-                } while (nextIndex === state.currentIndex && state.filteredData.length > 1);
+                do { nextIndex = Math.floor(Math.random() * state.filteredData.length); } while (nextIndex === state.currentIndex && state.filteredData.length > 1);
             } else {
                 nextIndex = (state.currentIndex + 1) % state.filteredData.length;
             }
-            
             state.currentIndex = nextIndex;
-            const nextItem = state.filteredData[nextIndex];
-            
+            const item = state.filteredData[nextIndex];
             stopAudio();
             if (state.viewMode === 'single') renderContent();
-            
-            if (isAuto) {
-                setTimeout(() => {
-                    playAudio(nextItem.id, nextIndex);
-                    if (state.viewMode === 'list') {
-                        const card = document.getElementById(`card-${nextItem.id}`);
-                        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }, 50);
-            }
+            if (isAuto) setTimeout(() => {
+                playAudio(item.id, nextIndex);
+                if (state.viewMode === 'list') {
+                    const card = document.getElementById(`card-${item.id}`);
+                    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 50);
         }
 
         function playPrev() {
             if (state.filteredData.length === 0 || state.viewMode === 'gacha') return;
-            let prevIndex = state.currentIndex - 1;
-            if (prevIndex < 0) prevIndex = state.filteredData.length - 1;
-            
-            state.currentIndex = prevIndex;
+            state.currentIndex = (state.currentIndex - 1 + state.filteredData.length) % state.filteredData.length;
             stopAudio(); 
             if (state.viewMode === 'single') renderContent();
         }
 
-        // --- 抽卡逻辑 ---
         function drawGacha(isBlind) {
             stopAudio();
             isGachaBlind = isBlind;
-            
             const levelData = readingData.filter(d => d.level === state.level);
             if (levelData.length === 0) return;
-
-            const randomIndex = Math.floor(Math.random() * levelData.length);
-            gachaItem = levelData[randomIndex];
-
+            gachaItem = levelData[Math.floor(Math.random() * levelData.length)];
             document.getElementById('currentSelectionTitle').innerHTML = `🎲 全域抽卡 <span style="font-size: 1rem; color: #7f8c8d; font-weight: normal; margin-left: 10px;">来源专题: ${gachaItem.topic}</span>`;
             document.getElementById('sentenceCount').textContent = `题库总量: ${levelData.length} 句`;
-
             renderGachaCard();
         }
 
-        // --- 文本格式化引擎 ---
+        // --- 优化后的排版引擎 ---
         function formatContent(text) {
-            if (/(A|B|C|Ａ|Ｂ|Ｃ)[：:]/.test(text)) {
-                let formatted = text.replace(/\n/g, '<br>');
-                formatted = formatted.replace(/(A|Ａ)[：:]/g, '<span class="speaker-a">A：</span>');
-                formatted = formatted.replace(/(B|Ｂ)[：:]/g, '<span class="speaker-b">B：</span>');
-                formatted = formatted.replace(/(C|Ｃ)[：:]/g, '<span class="speaker-c">C：</span>');
-                return formatted;
-            } else {
-                let formatted = text.replace(/\n/g, '');
-                formatted = formatted.replace(/。/g, '。<br>');
-                formatted = formatted.replace(/(<br>)+$/g, '');
-                return formatted;
-            }
+            const lines = text.split(/\n/).filter(l => l.trim() !== '');
+            let html = '';
+            
+            lines.forEach(line => {
+                const dialogueMatch = line.match(/^([A-CＡ-Ｃ])[：:](.*)$/);
+                if (dialogueMatch) {
+                    const speaker = dialogueMatch[1].toUpperCase().replace('Ａ','A').replace('Ｂ','B').replace('Ｃ','C');
+                    const content = dialogueMatch[2].trim();
+                    const colorClass = `speaker-${speaker.toLowerCase()}`;
+                    html += `<div class="dialogue-row">
+                                <span class="speaker-label ${colorClass}">${speaker}：</span>
+                                <span>${content}</span>
+                             </div>`;
+                } else {
+                    // 非对话行：按句号换行排版
+                    const sentences = line.replace(/。/g, '。|').split('|').filter(s => s.trim() !== '');
+                    sentences.forEach(s => {
+                        html += `<div class="narrative-row">${s}</div>`;
+                    });
+                }
+            });
+            return html;
         }
 
-        // --- 独立的解盲切换逻辑 ---
         function toggleReveal(id, btnElement) {
             const textEl = document.getElementById(`text-${id}`);
             if (!textEl) return;
-            
             const isRevealed = textEl.classList.toggle('revealed');
-            if (isRevealed) {
-                btnElement.textContent = '🙈 遮蔽';
-            } else {
-                btnElement.textContent = '👁️ 解盲';
-            }
+            btnElement.textContent = isRevealed ? '🙈 遮蔽' : '👁️ 解盲';
         }
 
-        // --- 渲染 UI ---
         function updatePlayingUI(id, isPlaying) {
             const card = document.getElementById(`card-${id}`);
             const btn = document.getElementById(`btn-${id}`);
             if (!card || !btn) return;
-
-            if (isPlaying) {
-                card.classList.add('playing');
-                btn.textContent = '⏹ 停止';
-                btn.classList.add('playing-state');
-            } else {
-                card.classList.remove('playing');
-                btn.textContent = '▶ 播放';
-                btn.classList.remove('playing-state');
-            }
+            card.classList.toggle('playing', isPlaying);
+            btn.textContent = isPlaying ? '⏹ 停止' : '▶ 播放';
+            btn.classList.toggle('playing-state', isPlaying);
         }
 
         function renderGachaCard() {
             const container = document.getElementById('cardContainer');
             container.className = 'single-view';
-            if (isGachaBlind) {
-                container.classList.add('blind-mode');
-            } else {
-                container.classList.remove('blind-mode');
-            }
-            container.innerHTML = '';
-
-            const controlsDiv = document.createElement('div');
-            controlsDiv.className = 'gacha-controls';
-            controlsDiv.innerHTML = `
+            container.classList.toggle('blind-mode', isGachaBlind);
+            container.innerHTML = `<div class="gacha-controls">
                 <button class="gacha-btn" onclick="drawGacha(false)">🎲 普通抽卡</button>
-                <button class="gacha-btn blind-draw" onclick="drawGacha(true)">👁️ 盲听抽卡</button>
-            `;
-            container.appendChild(controlsDiv);
-
-            if (gachaItem) {
-                container.appendChild(createCardHTML(gachaItem, 0));
-            }
+                <button class="gacha-btn gacha-btn blind-draw" onclick="drawGacha(true)">👁️ 盲听抽卡</button>
+            </div>`;
+            if (gachaItem) container.appendChild(createCardHTML(gachaItem, 0));
         }
 
         function renderContent() {
             const container = document.getElementById('cardContainer');
             document.getElementById('currentSelectionTitle').textContent = `${state.level} - ${state.topic}`;
             document.getElementById('sentenceCount').textContent = `共 ${state.filteredData.length} 句`;
-            
             container.className = state.viewMode === 'list' ? 'list-view' : 'single-view';
-            if (state.settings.blind) container.classList.add('blind-mode');
-            
+            container.classList.toggle('blind-mode', state.settings.blind);
             container.innerHTML = '';
 
             if (state.viewMode === 'list') {
-                state.filteredData.forEach((item, index) => {
-                    container.appendChild(createCardHTML(item, index));
-                });
-            } else {
-                if (state.filteredData.length > 0) {
-                    const item = state.filteredData[state.currentIndex];
-                    container.appendChild(createCardHTML(item, state.currentIndex));
-                    
-                    const navDiv = document.createElement('div');
-                    navDiv.className = 'single-nav-btns';
-                    navDiv.innerHTML = `
-                        <button class="nav-btn" onclick="playPrev()">← 上一句</button>
-                        <button class="nav-btn" onclick="playNext()">下一句 →</button>
-                    `;
-                    container.appendChild(navDiv);
-                }
+                state.filteredData.forEach((item, index) => container.appendChild(createCardHTML(item, index)));
+            } else if (state.filteredData.length > 0) {
+                const item = state.filteredData[state.currentIndex];
+                container.appendChild(createCardHTML(item, state.currentIndex));
+                const navDiv = document.createElement('div');
+                navDiv.className = 'single-nav-btns';
+                navDiv.innerHTML = `<button class="nav-btn" onclick="playPrev()">← 上一句</button>
+                                   <button class="nav-btn" onclick="playNext()">下一句 →</button>`;
+                container.appendChild(navDiv);
             }
         }
 
@@ -491,23 +372,19 @@
             const formattedContent = formatContent(item.content);
 
             if (state.viewMode === 'list') {
-                div.innerHTML = `
-                    <div class="card-left">
+                div.innerHTML = `<div class="card-left">
                         <span class="sentence-id">No. ${item.id}</span>
                         <button id="btn-${item.id}" class="play-btn" onclick="playAudio(${item.id}, ${index})">▶ 播放</button>
                         <button class="reveal-btn" onclick="toggleReveal(${item.id}, this)">👁️ 解盲</button>
                     </div>
-                    <div class="card-text" id="text-${item.id}">${formattedContent}</div>
-                `;
+                    <div id="text-${item.id}" class="card-text">${formattedContent}</div>`;
             } else {
-                div.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 15px; width: 100%; border-bottom: 1px dashed #e2e8f0; padding-bottom: 15px; margin-bottom: 10px;">
+                div.innerHTML = `<div style="display: flex; align-items: center; gap: 15px; width: 100%; border-bottom: 1px dashed #e2e8f0; padding-bottom: 15px; margin-bottom: 10px;">
                         <span class="sentence-id" style="font-size: 1rem; padding: 6px 14px; margin: 0;">No. ${item.id}</span>
                         <button id="btn-${item.id}" class="play-btn" style="margin: 0; width: auto; padding: 8px 18px;" onclick="playAudio(${item.id}, ${index})">▶ 播放</button>
                         <button class="reveal-btn" style="margin: 0; padding: 8px 18px;" onclick="toggleReveal(${item.id}, this)">👁️ 解盲</button>
                     </div>
-                    <div class="card-text" id="text-${item.id}" style="font-size: 1.5rem; line-height: 1.8;">${formattedContent}</div>
-                `;
+                    <div id="text-${item.id}" class="card-text" style="font-size: 1.5rem; line-height: 1.8;">${formattedContent}</div>`;
             }
             return div;
         }
