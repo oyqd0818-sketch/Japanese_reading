@@ -16,6 +16,7 @@
             --border-color: #e2e8f0;
             --playing-bg: #ebf5ff;
             --danger-color: #e74c3c;
+            --gacha-color: #9b59b6;
         }
 
         * { box-sizing: border-box; }
@@ -30,279 +31,80 @@
             overflow: hidden;
         }
 
-        /* 侧边栏优化 */
-        .sidebar {
-            width: 280px;
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
-            z-index: 10;
-        }
-
-        .sidebar-header {
-            padding: 24px 20px;
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            border-bottom: 1px solid var(--border-color);
-            text-align: center;
-            letter-spacing: 1px;
-        }
-
-        .level-selector {
-            display: flex;
-            justify-content: space-around;
-            padding: 15px;
-            border-bottom: 1px solid var(--border-color);
-            background: #fafbfc;
-        }
-
-        .level-btn {
-            padding: 8px 18px;
-            border: 2px solid var(--border-color);
-            background: white;
-            color: var(--text-light);
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .level-btn.active, .level-btn:hover {
-            border-color: var(--primary-color);
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .topic-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px 0;
-            list-style: none;
-            margin: 0;
-        }
-
-        .topic-item {
-            padding: 14px 24px;
-            cursor: pointer;
-            font-size: 1.05rem;
-            transition: all 0.2s;
-            border-left: 4px solid transparent;
-        }
-
+        /* --- 侧边栏与控制台基础样式 --- */
+        .sidebar { width: 280px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.03); z-index: 10; }
+        .sidebar-header { padding: 24px 20px; font-size: 1.3rem; font-weight: 600; color: var(--primary-color); border-bottom: 1px solid var(--border-color); text-align: center; letter-spacing: 1px; }
+        .level-selector { display: flex; justify-content: space-around; padding: 15px; border-bottom: 1px solid var(--border-color); background: #fafbfc; }
+        .level-btn { padding: 8px 18px; border: 2px solid var(--border-color); background: white; color: var(--text-light); border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .level-btn.active, .level-btn:hover { border-color: var(--primary-color); background: var(--primary-color); color: white; }
+        .topic-list { flex: 1; overflow-y: auto; padding: 10px 0; list-style: none; margin: 0; }
+        .topic-item { padding: 14px 24px; cursor: pointer; font-size: 1.05rem; transition: all 0.2s; border-left: 4px solid transparent; }
         .topic-item:hover { background-color: #f8fafc; }
-        .topic-item.active {
-            background-color: var(--playing-bg);
-            color: var(--primary-color);
-            border-left: 4px solid var(--primary-color);
-            font-weight: 500;
-        }
+        .topic-item.active { background-color: var(--playing-bg); color: var(--primary-color); border-left: 4px solid var(--primary-color); font-weight: 500; }
 
-        /* 主内容区与控制台 */
-        .main-wrapper {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* 顶部学习控制台 */
-        .control-panel {
-            background: var(--panel-bg);
-            padding: 15px 30px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-            z-index: 5;
-        }
-
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .control-panel { background: var(--panel-bg); padding: 15px 30px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); z-index: 5; }
         .panel-group { display: flex; gap: 15px; align-items: center; }
 
-        .toggle-btn {
-            padding: 8px 16px;
-            border: 1px solid var(--border-color);
-            background: white;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            color: var(--text-light);
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+        .toggle-btn { padding: 8px 16px; border: 1px solid var(--border-color); background: white; border-radius: 6px; cursor: pointer; font-size: 0.95rem; color: var(--text-light); transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        .toggle-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .toggle-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .toggle-btn.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
+        .view-switch { display: flex; background: #f1f5f9; border-radius: 8px; padding: 4px; }
+        .view-btn { padding: 6px 16px; border: none; background: transparent; border-radius: 6px; cursor: pointer; color: var(--text-light); font-weight: 500; transition: all 0.2s; }
+        .view-btn.active { background: white; color: var(--primary-color); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
-        /* 视图切换按钮组合 */
-        .view-switch {
-            display: flex;
-            background: #f1f5f9;
-            border-radius: 8px;
-            padding: 4px;
-        }
-        .view-btn {
-            padding: 6px 16px;
-            border: none;
-            background: transparent;
-            border-radius: 6px;
-            cursor: pointer;
-            color: var(--text-light);
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .view-btn.active {
-            background: white;
-            color: var(--primary-color);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        /* 阅读主区域 */
-        .main-content {
-            flex: 1;
-            padding: 30px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .content-wrapper {
-            width: 100%;
-            max-width: 800px;
-        }
-
-        .content-header {
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--border-color);
-        }
-
+        /* --- 主内容区与卡片 --- */
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        .content-wrapper { width: 100%; max-width: 800px; }
+        .content-header { margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 10px; border-bottom: 2px solid var(--border-color); }
         .header-title { font-size: 1.6rem; font-weight: bold; color: var(--text-main); }
         .header-count { font-size: 1rem; color: var(--text-light); }
 
-        /* 卡片通用样式 */
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-            border: 1px solid var(--border-color);
-            transition: all 0.2s ease;
-            position: relative;
-        }
+        .card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid var(--border-color); transition: all 0.2s ease; position: relative; }
+        .card.playing { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2); background-color: var(--playing-bg); }
 
-        .card.playing {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
-            background-color: var(--playing-bg);
-        }
+        .blind-mode .card-text { filter: blur(8px); opacity: 0.6; transition: all 0.3s ease; cursor: pointer; user-select: none; }
+        .blind-mode .card-text:hover, .blind-mode .card-text:active { filter: blur(0); opacity: 1; }
 
-        /* 盲听模式模糊效果 */
-        .blind-mode .card-text {
-            filter: blur(8px);
-            opacity: 0.6;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            user-select: none;
-        }
-        .blind-mode .card-text:hover,
-        .blind-mode .card-text:active {
-            filter: blur(0);
-            opacity: 1;
-        }
-
-        /* 列表模式布局 */
+        /* --- 视图布局调整 --- */
         .list-view { display: flex; flex-direction: column; gap: 16px; }
-        .list-view .card {
-            display: flex;
-            align-items: flex-start;
-            gap: 20px;
+        .list-view .card { display: flex; align-items: flex-start; gap: 20px; }
+        
+        .single-view { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 50vh; }
+        .single-view .card { 
+            width: 100%; 
+            padding: 40px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: flex-start; /* 改为左对齐 */
+            gap: 20px; 
         }
         
-        /* 单句卡片模式布局 */
-        .single-view {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 50vh;
-        }
-        .single-view .card {
-            width: 100%;
-            text-align: center;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 30px;
-        }
-        .single-nav-btns {
-            display: flex;
-            gap: 20px;
-            margin-top: 30px;
-            width: 100%;
-            justify-content: center;
-        }
-        .nav-btn {
-            padding: 10px 24px;
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 1rem;
-            color: var(--text-main);
-            transition: all 0.2s;
-        }
-        .nav-btn:hover:not(:disabled) {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-        }
-        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-        /* 内部元素 */
+        /* 内部元素与排版颜色 */
         .card-left { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 80px; }
-        .sentence-id {
-            background: #f1f5f9;
-            color: var(--text-light);
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: bold;
-        }
-        .card-text {
-            flex: 1;
-            font-size: 1.25rem;
-            line-height: 1.8;
-            color: var(--text-main);
-        }
+        .sentence-id { background: #f1f5f9; color: var(--text-light); padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; }
+        .card-text { flex: 1; font-size: 1.25rem; line-height: 1.8; color: var(--text-main); width: 100%; }
+        
+        .speaker-a { color: #e74c3c; font-weight: bold; }
+        .speaker-b { color: #3498db; font-weight: bold; }
+        .speaker-c { color: #27ae60; font-weight: bold; }
 
-        .play-btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            width: 100px;
-            transition: all 0.2s;
-            font-weight: 500;
-        }
+        .play-btn { background-color: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 0.95rem; width: 100px; transition: all 0.2s; font-weight: 500; }
         .play-btn:hover { background-color: var(--primary-dark); }
         .play-btn.playing-state { background-color: var(--danger-color); }
         .play-btn.playing-state:hover { background-color: #c0392b; }
+
+        .single-nav-btns { display: flex; gap: 20px; margin-top: 30px; width: 100%; justify-content: center; }
+        .nav-btn { padding: 10px 24px; background: white; border: 1px solid var(--border-color); border-radius: 20px; cursor: pointer; font-size: 1rem; color: var(--text-main); transition: all 0.2s; }
+        .nav-btn:hover:not(:disabled) { border-color: var(--primary-color); color: var(--primary-color); }
+
+        /* --- 抽卡模式专属样式 --- */
+        .gacha-controls { display: flex; gap: 20px; margin-bottom: 30px; justify-content: center; width: 100%; }
+        .gacha-btn { padding: 14px 30px; font-size: 1.1rem; border-radius: 30px; border: 2px solid var(--primary-color); background: white; color: var(--primary-color); cursor: pointer; transition: all 0.2s; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .gacha-btn:hover { background: var(--primary-color); color: white; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+        .gacha-btn.blind-draw { border-color: var(--gacha-color); color: var(--gacha-color); }
+        .gacha-btn.blind-draw:hover { background: var(--gacha-color); color: white; }
 
     </style>
 </head>
@@ -315,12 +117,12 @@
     </div>
 
     <div class="main-wrapper">
-        
         <div class="control-panel">
             <div class="panel-group">
                 <div class="view-switch">
                     <button class="view-btn active" id="btnViewList" onclick="switchView('list')">列表浏览</button>
                     <button class="view-btn" id="btnViewSingle" onclick="switchView('single')">单句沉浸</button>
+                    <button class="view-btn" id="btnViewGacha" onclick="switchView('gacha')">🎲 抽卡模式</button>
                 </div>
             </div>
             <div class="panel-group">
@@ -344,258 +146,330 @@
     <script src="data.js"></script>
     
     <script>
-// --- 核心状态 ---
-let state = {
-    level: 'N1',
-    topic: '',
-    viewMode: 'list', // 'list' | 'single'
-    settings: { blind: false, autoPlay: false, random: false },
-    filteredData: [],
-    currentIndex: 0, 
-    playingId: null
-};
+        let state = {
+            level: 'N1',
+            topic: '',
+            viewMode: 'list', 
+            settings: { blind: false, autoPlay: false, random: false },
+            filteredData: [],
+            currentIndex: 0, 
+            playingId: null
+        };
+        
+        let currentAudio = null;
+        let gachaItem = null;
+        let isGachaBlind = false;
 
-let currentAudio = null;
-
-// --- 初始化 ---
-function init() {
-    renderLevelSelectors();
-    selectLevel('N1'); 
-}
-
-// --- 侧边栏逻辑 ---
-function renderLevelSelectors() {
-    const levels = ['N1', 'N2', 'N3'];
-    const container = document.getElementById('levelSelector');
-    container.innerHTML = '';
-    levels.forEach(l => {
-        const btn = document.createElement('button');
-        btn.className = `level-btn ${l === state.level ? 'active' : ''}`;
-        btn.textContent = l;
-        btn.onclick = () => selectLevel(l);
-        container.appendChild(btn);
-    });
-}
-
-function selectLevel(l) {
-    state.level = l;
-    renderLevelSelectors();
-    const topics = [...new Set(readingData.filter(d => d.level === l).map(d => d.topic))];
-    if (topics.length > 0) selectTopic(topics[0]); 
-    renderTopicList(topics);
-}
-
-function renderTopicList(topics) {
-    const container = document.getElementById('topicList');
-    container.innerHTML = '';
-    topics.forEach(t => {
-        const li = document.createElement('li');
-        li.className = `topic-item ${t === state.topic ? 'active' : ''}`;
-        li.textContent = t;
-        li.onclick = () => { selectTopic(t); renderTopicList(topics); };
-        container.appendChild(li);
-    });
-}
-
-function selectTopic(t) {
-    state.topic = t;
-    state.filteredData = readingData.filter(d => d.level === state.level && d.topic === state.topic);
-    state.currentIndex = 0; 
-    stopAudio();
-    renderContent();
-}
-
-// --- 控制台设置逻辑 ---
-function toggleSetting(key) {
-    state.settings[key] = !state.settings[key];
-    const btn = document.getElementById(
-        key === 'blind' ? 'btnBlind' : 
-        key === 'autoPlay' ? 'btnAutoPlay' : 'btnRandom'
-    );
-    btn.classList.toggle('active', state.settings[key]);
-    
-    if (key === 'blind') {
-        document.getElementById('cardContainer').classList.toggle('blind-mode', state.settings.blind);
-    }
-}
-
-function switchView(mode) {
-    if (state.viewMode === mode) return;
-    state.viewMode = mode;
-    document.getElementById('btnViewList').classList.toggle('active', mode === 'list');
-    document.getElementById('btnViewSingle').classList.toggle('active', mode === 'single');
-    
-    if (state.playingId) {
-        const idx = state.filteredData.findIndex(item => item.id === state.playingId);
-        if (idx !== -1) state.currentIndex = idx;
-    }
-    renderContent();
-    
-    if (state.playingId) updatePlayingUI(state.playingId, true);
-}
-
-// --- 核心播放逻辑 ---
-function stopAudio() {
-    if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-        currentAudio = null;
-    }
-    if (state.playingId) {
-        updatePlayingUI(state.playingId, false);
-        state.playingId = null;
-    }
-}
-
-function playAudio(id, index) {
-    if (state.playingId === id && currentAudio && !currentAudio.paused) {
-        stopAudio(); 
-        return;
-    }
-    stopAudio();
-
-    state.playingId = id;
-    state.currentIndex = index; 
-    
-    updatePlayingUI(id, true);
-
-    const audioPath = `./audio/${state.level}/T${id}.mp3`;
-    currentAudio = new Audio(audioPath);
-    
-    currentAudio.play().catch(err => {
-        alert(`无法播放音频: ${audioPath}`);
-        stopAudio();
-    });
-
-    // 播放结束后的逻辑
-    currentAudio.onended = () => {
-        updatePlayingUI(id, false);
-        state.playingId = null;
-
-        // 只有开启了自动连播，且当前音频自然结束时，才自动触发下一句的音频
-        if (state.settings.autoPlay) {
-            playNext(true); 
+        function init() {
+            renderLevelSelectors();
+            selectLevel('N1'); 
         }
-    };
-}
 
-// 修复 Bug：增加 isAuto 标识。默认为 false（即手动点击，不播声音）
-function playNext(isAuto = false) {
-    if (state.filteredData.length === 0) return;
-    
-    let nextIndex = state.currentIndex;
-    if (state.settings.random) {
-        do {
-            nextIndex = Math.floor(Math.random() * state.filteredData.length);
-        } while (nextIndex === state.currentIndex && state.filteredData.length > 1);
-    } else {
-        nextIndex = (state.currentIndex + 1) % state.filteredData.length;
-    }
-    
-    state.currentIndex = nextIndex;
-    const nextItem = state.filteredData[nextIndex];
-    
-    // 翻页前强制停止当前可能正在播放的音频
-    stopAudio();
-    
-    if (state.viewMode === 'single') renderContent();
-    
-    if (isAuto) {
-        // 如果是连播触发的，才自动播放声音
-        setTimeout(() => {
-            playAudio(nextItem.id, nextIndex);
-            if (state.viewMode === 'list') {
-                const card = document.getElementById(`card-${nextItem.id}`);
-                if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }, 50);
-    }
-}
+        function renderLevelSelectors() {
+            const levels = ['N1', 'N2', 'N3'];
+            const container = document.getElementById('levelSelector');
+            container.innerHTML = '';
+            levels.forEach(l => {
+                const btn = document.createElement('button');
+                btn.className = `level-btn ${l === state.level ? 'active' : ''}`;
+                btn.textContent = l;
+                btn.onclick = () => selectLevel(l);
+                container.appendChild(btn);
+            });
+        }
 
-function playPrev() {
-    if (state.filteredData.length === 0) return;
-    let prevIndex = state.currentIndex - 1;
-    if (prevIndex < 0) prevIndex = state.filteredData.length - 1;
-    
-    state.currentIndex = prevIndex;
-    
-    stopAudio(); // 翻页前强制停止音频
-    if (state.viewMode === 'single') renderContent();
-    // 上一句纯手动操作，不需要触发声音
-}
-
-// --- 渲染 UI ---
-function updatePlayingUI(id, isPlaying) {
-    const card = document.getElementById(`card-${id}`);
-    const btn = document.getElementById(`btn-${id}`);
-    if (!card || !btn) return;
-
-    if (isPlaying) {
-        card.classList.add('playing');
-        btn.textContent = '⏹ 停止';
-        btn.classList.add('playing-state');
-    } else {
-        card.classList.remove('playing');
-        btn.textContent = '▶ 播放';
-        btn.classList.remove('playing-state');
-    }
-}
-
-function renderContent() {
-    const container = document.getElementById('cardContainer');
-    document.getElementById('currentSelectionTitle').textContent = `${state.level} - ${state.topic}`;
-    document.getElementById('sentenceCount').textContent = `共 ${state.filteredData.length} 句`;
-    
-    container.className = state.viewMode === 'list' ? 'list-view' : 'single-view';
-    if (state.settings.blind) container.classList.add('blind-mode');
-    
-    container.innerHTML = '';
-
-    if (state.viewMode === 'list') {
-        state.filteredData.forEach((item, index) => {
-            container.appendChild(createCardHTML(item, index));
-        });
-    } else {
-        if (state.filteredData.length > 0) {
-            const item = state.filteredData[state.currentIndex];
-            container.appendChild(createCardHTML(item, state.currentIndex));
+        function selectLevel(l) {
+            state.level = l;
+            renderLevelSelectors();
+            const topics = [...new Set(readingData.filter(d => d.level === l).map(d => d.topic))];
             
-            const navDiv = document.createElement('div');
-            navDiv.className = 'single-nav-btns';
-            navDiv.innerHTML = `
-                <button class="nav-btn" onclick="playPrev()">← 上一句</button>
-                <button class="nav-btn" onclick="playNext()">下一句 →</button>
-            `;
-            container.appendChild(navDiv);
+            if (state.viewMode === 'gacha') {
+                drawGacha(isGachaBlind); 
+                renderTopicList(topics);
+                return;
+            }
+            
+            if (topics.length > 0) selectTopic(topics[0]); 
+            renderTopicList(topics);
         }
-    }
-}
 
-function createCardHTML(item, index) {
-    const div = document.createElement('div');
-    div.className = 'card';
-    div.id = `card-${item.id}`;
-    const formattedContent = item.content.replace(/\n/g, '<br>');
+        function renderTopicList(topics) {
+            const container = document.getElementById('topicList');
+            container.innerHTML = '';
+            topics.forEach(t => {
+                const li = document.createElement('li');
+                li.className = `topic-item ${t === state.topic ? 'active' : ''}`;
+                li.textContent = t;
+                li.onclick = () => { selectTopic(t); renderTopicList(topics); };
+                container.appendChild(li);
+            });
+        }
 
-    if (state.viewMode === 'list') {
-        div.innerHTML = `
-            <div class="card-left">
-                <span class="sentence-id">No. ${item.id}</span>
-                <button id="btn-${item.id}" class="play-btn" onclick="playAudio(${item.id}, ${index})">▶ 播放</button>
-            </div>
-            <div class="card-text">${formattedContent}</div>
-        `;
-    } else {
-        div.innerHTML = `
-            <span class="sentence-id">No. ${item.id}</span>
-            <div class="card-text" style="font-size: 1.5rem; margin: 20px 0;">${formattedContent}</div>
-            <button id="btn-${item.id}" class="play-btn" style="width: 140px; font-size: 1.1rem; padding: 12px;" onclick="playAudio(${item.id}, ${index})">▶ 播放</button>
-        `;
-    }
-    return div;
-}
+        function selectTopic(t) {
+            state.topic = t;
+            state.filteredData = readingData.filter(d => d.level === state.level && d.topic === state.topic);
+            state.currentIndex = 0; 
+            stopAudio();
 
-window.onload = init;
+            // 如果在抽卡模式下点击了具体专题，自动切回单句沉浸模式
+            if (state.viewMode === 'gacha') {
+                switchView('single');
+            } else {
+                renderContent();
+            }
+        }
+
+        function toggleSetting(key) {
+            state.settings[key] = !state.settings[key];
+            const btn = document.getElementById(
+                key === 'blind' ? 'btnBlind' : 
+                key === 'autoPlay' ? 'btnAutoPlay' : 'btnRandom'
+            );
+            btn.classList.toggle('active', state.settings[key]);
+            
+            if (key === 'blind' && state.viewMode !== 'gacha') {
+                document.getElementById('cardContainer').classList.toggle('blind-mode', state.settings.blind);
+            }
+        }
+
+        function switchView(mode) {
+            if (state.viewMode === mode) return;
+            state.viewMode = mode;
+            document.getElementById('btnViewList').classList.toggle('active', mode === 'list');
+            document.getElementById('btnViewSingle').classList.toggle('active', mode === 'single');
+            document.getElementById('btnViewGacha').classList.toggle('active', mode === 'gacha');
+            
+            // 抽卡模式禁用常规控制台按钮
+            const isGacha = mode === 'gacha';
+            document.getElementById('btnBlind').disabled = isGacha;
+            document.getElementById('btnAutoPlay').disabled = isGacha;
+            document.getElementById('btnRandom').disabled = isGacha;
+
+            stopAudio();
+
+            if (isGacha) {
+                drawGacha(false);
+            } else {
+                renderContent();
+            }
+        }
+
+        // --- 核心播放逻辑 ---
+        function stopAudio() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+            if (state.playingId) {
+                updatePlayingUI(state.playingId, false);
+                state.playingId = null;
+            }
+        }
+
+        function playAudio(id, index) {
+            if (state.playingId === id && currentAudio && !currentAudio.paused) {
+                stopAudio(); 
+                return;
+            }
+            stopAudio();
+
+            state.playingId = id;
+            if (state.viewMode !== 'gacha') state.currentIndex = index; 
+            
+            updatePlayingUI(id, true);
+
+            const audioPath = `./audio/${state.level}/T${id}.mp3`;
+            currentAudio = new Audio(audioPath);
+            
+            currentAudio.play().catch(err => {
+                alert(`无法播放音频: ${audioPath}`);
+                stopAudio();
+            });
+
+            currentAudio.onended = () => {
+                updatePlayingUI(id, false);
+                state.playingId = null;
+                
+                // 仅在非抽卡且开启连播时自动下一句
+                if (state.viewMode !== 'gacha' && state.settings.autoPlay) {
+                    playNext(true); 
+                }
+            };
+        }
+
+        function playNext(isAuto = false) {
+            if (state.filteredData.length === 0 || state.viewMode === 'gacha') return;
+            
+            let nextIndex = state.currentIndex;
+            if (state.settings.random) {
+                do {
+                    nextIndex = Math.floor(Math.random() * state.filteredData.length);
+                } while (nextIndex === state.currentIndex && state.filteredData.length > 1);
+            } else {
+                nextIndex = (state.currentIndex + 1) % state.filteredData.length;
+            }
+            
+            state.currentIndex = nextIndex;
+            const nextItem = state.filteredData[nextIndex];
+            
+            stopAudio();
+            if (state.viewMode === 'single') renderContent();
+            
+            if (isAuto) {
+                setTimeout(() => {
+                    playAudio(nextItem.id, nextIndex);
+                    if (state.viewMode === 'list') {
+                        const card = document.getElementById(`card-${nextItem.id}`);
+                        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 50);
+            }
+        }
+
+        function playPrev() {
+            if (state.filteredData.length === 0 || state.viewMode === 'gacha') return;
+            let prevIndex = state.currentIndex - 1;
+            if (prevIndex < 0) prevIndex = state.filteredData.length - 1;
+            
+            state.currentIndex = prevIndex;
+            stopAudio(); 
+            if (state.viewMode === 'single') renderContent();
+        }
+
+        // --- 抽卡逻辑 ---
+        function drawGacha(isBlind) {
+            stopAudio();
+            isGachaBlind = isBlind;
+            
+            // 在当前大等级（如 N1）的全部库中随机抽取
+            const levelData = readingData.filter(d => d.level === state.level);
+            if (levelData.length === 0) return;
+
+            const randomIndex = Math.floor(Math.random() * levelData.length);
+            gachaItem = levelData[randomIndex];
+
+            // 更新标题栏信息
+            document.getElementById('currentSelectionTitle').innerHTML = `🎲 全域抽卡 <span style="font-size: 1rem; color: #7f8c8d; font-weight: normal; margin-left: 10px;">来源专题: ${gachaItem.topic}</span>`;
+            document.getElementById('sentenceCount').textContent = `题库总量: ${levelData.length} 句`;
+
+            renderGachaCard();
+        }
+
+        // --- 文本格式化引擎 ---
+        function formatContent(text) {
+            // 先处理原本的换行符
+            let formatted = text.replace(/\n/g, '<br>');
+            
+            // 判断是否包含对话标记 (支持全半角冒号)
+            if (/(A|B|C|Ａ|Ｂ|Ｃ)[：:]/.test(text)) {
+                formatted = formatted.replace(/(A|Ａ)[：:]/g, '<span class="speaker-a">A：</span>');
+                formatted = formatted.replace(/(B|Ｂ)[：:]/g, '<span class="speaker-b">B：</span>');
+                formatted = formatted.replace(/(C|Ｃ)[：:]/g, '<span class="speaker-c">C：</span>');
+            } else {
+                // 非对话状态，把句号替换为句号+强制双换行，打散段落
+                formatted = formatted.replace(/。/g, '。<br><br>');
+                // 清理可能因为结尾句号产生的多余空行
+                formatted = formatted.replace(/(<br>)+$/g, '');
+            }
+            return formatted;
+        }
+
+        // --- 渲染 UI ---
+        function updatePlayingUI(id, isPlaying) {
+            const card = document.getElementById(`card-${id}`);
+            const btn = document.getElementById(`btn-${id}`);
+            if (!card || !btn) return;
+
+            if (isPlaying) {
+                card.classList.add('playing');
+                btn.textContent = '⏹ 停止';
+                btn.classList.add('playing-state');
+            } else {
+                card.classList.remove('playing');
+                btn.textContent = '▶ 播放';
+                btn.classList.remove('playing-state');
+            }
+        }
+
+        function renderGachaCard() {
+            const container = document.getElementById('cardContainer');
+            container.className = 'single-view';
+            if (isGachaBlind) {
+                container.classList.add('blind-mode');
+            } else {
+                container.classList.remove('blind-mode');
+            }
+            container.innerHTML = '';
+
+            const controlsDiv = document.createElement('div');
+            controlsDiv.className = 'gacha-controls';
+            controlsDiv.innerHTML = `
+                <button class="gacha-btn" onclick="drawGacha(false)">🎲 普通抽卡</button>
+                <button class="gacha-btn blind-draw" onclick="drawGacha(true)">👁️ 盲听抽卡</button>
+            `;
+            container.appendChild(controlsDiv);
+
+            if (gachaItem) {
+                container.appendChild(createCardHTML(gachaItem, 0));
+            }
+        }
+
+        function renderContent() {
+            const container = document.getElementById('cardContainer');
+            document.getElementById('currentSelectionTitle').textContent = `${state.level} - ${state.topic}`;
+            document.getElementById('sentenceCount').textContent = `共 ${state.filteredData.length} 句`;
+            
+            container.className = state.viewMode === 'list' ? 'list-view' : 'single-view';
+            if (state.settings.blind) container.classList.add('blind-mode');
+            
+            container.innerHTML = '';
+
+            if (state.viewMode === 'list') {
+                state.filteredData.forEach((item, index) => {
+                    container.appendChild(createCardHTML(item, index));
+                });
+            } else {
+                if (state.filteredData.length > 0) {
+                    const item = state.filteredData[state.currentIndex];
+                    container.appendChild(createCardHTML(item, state.currentIndex));
+                    
+                    const navDiv = document.createElement('div');
+                    navDiv.className = 'single-nav-btns';
+                    navDiv.innerHTML = `
+                        <button class="nav-btn" onclick="playPrev()">← 上一句</button>
+                        <button class="nav-btn" onclick="playNext()">下一句 →</button>
+                    `;
+                    container.appendChild(navDiv);
+                }
+            }
+        }
+
+        function createCardHTML(item, index) {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.id = `card-${item.id}`;
+            const formattedContent = formatContent(item.content);
+
+            if (state.viewMode === 'list') {
+                div.innerHTML = `
+                    <div class="card-left">
+                        <span class="sentence-id">No. ${item.id}</span>
+                        <button id="btn-${item.id}" class="play-btn" onclick="playAudio(${item.id}, ${index})">▶ 播放</button>
+                    </div>
+                    <div class="card-text">${formattedContent}</div>
+                `;
+            } else {
+                div.innerHTML = `
+                    <span class="sentence-id">No. ${item.id}</span>
+                    <div class="card-text" style="font-size: 1.5rem; margin: 10px 0;">${formattedContent}</div>
+                    <button id="btn-${item.id}" class="play-btn" style="width: 140px; font-size: 1.1rem; padding: 12px; align-self: flex-start;" onclick="playAudio(${item.id}, ${index})">▶ 播放</button>
+                `;
+            }
+            return div;
+        }
+
+        window.onload = init;
     </script>
 </body>
 </html>
