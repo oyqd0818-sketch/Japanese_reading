@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日语分级阅读与听力系统</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --bg-color: #f5f7fa;
+            --sidebar-bg: #ffffff;
+            --text-main: #333333;
+            --text-light: #666666;
+            --border-color: #e1e4e8;
+            --playing-bg: #eef6ff;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 侧边栏样式保持不变 */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .level-selector {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .level-btn {
+            padding: 8px 15px;
+            border: 1px solid var(--primary-color);
+            background: transparent;
+            color: var(--primary-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .level-btn.active, .level-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .topic-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+            list-style: none;
+            margin: 0;
+        }
+
+        .topic-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .topic-item:hover, .topic-item.active {
+            background-color: #f0f4f8;
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* 主内容区样式升级为单列列表模式 */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* 居中整个阅读区 */
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 800px; /* 限制最大宽度，提升阅读舒适度 */
+        }
+
+        .content-header {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            color: var(--text-main);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        .card-container {
+            display: flex;
+            flex-direction: column; /* 改为垂直单列排版 */
+            gap: 15px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            display: flex;
+            align-items: flex-start; /* 左右分栏布局 */
+            gap: 20px;
+            border: 1px solid var(--border-color);
+            border-left: 5px solid transparent; /* 为高亮预留位置 */
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: #cce0ff;
+        }
+
+        /* 正在播放时的卡片高亮样式 */
+        .card.playing {
+            border-left: 5px solid var(--primary-color);
+            background-color: var(--playing-bg);
+            border-color: var(--primary-color);
+        }
+
+        .card-left {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            min-width: 80px;
+        }
+
+        .sentence-id {
+            background: #f0f4f8;
+            color: var(--text-light);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .card-body {
+            flex: 1;
+            font-size: 1.15rem; /* 稍微放大日文字体 */
+            line-height: 1.8;
+            color: var(--text-main);
+        }
+
+        .play-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px; /* 圆角按钮 */
+            cursor: pointer;
+            font-size: 0.9rem;
+            width: 80px;
+            transition: all 0.2s;
+        }
+
+        .play-btn:hover {
+            background-color: #357abd;
+        }
+
+        .play-btn.playing-state {
+            background-color: #ff5c5c; /* 停止按钮变为红色警示色 */
+        }
+        
+        .play-btn.playing-state:hover {
+            background-color: #e04848;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">日语语料库</div>
+        <div class="level-selector" id="levelSelector"></div>
+        <ul class="topic-list" id="topicList"></ul>
+    </div>
+
+    <div class="main-content">
+        <div class="content-wrapper">
+            <div class="content-header">
+                <span id="currentSelectionTitle">请选择等级和专题</span>
+                <span id="sentenceCount" style="font-size: 1rem; color: var(--text-light);"></span>
+            </div>
+            <div class="card-container" id="cardContainer">
+                </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    
+    <script>
+        let currentLevel = 'N1';
+        let currentTopic = '';
+        let currentAudio = null; 
+        let currentPlayingId = null; // 记录当前正在播放的句子ID
+
+        function init() {
+            renderLevelSelectors();
+            selectLevel('N1'); 
+        }
+
+        function renderLevelSelectors() {
+            const levels = ['N1', 'N2', 'N3'];
+            const container = document.getElementById('levelSelector');
+            container.innerHTML = '';
+            
+            levels.forEach(level => {
+                const btn = document.createElement('button');
+                btn.className = `level-btn ${level === currentLevel ? 'active' : ''}`;
+                btn.textContent = level;
+                btn.onclick = () => selectLevel(level);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectLevel(level) {
+            currentLevel = level;
+            renderLevelSelectors();
+            
+            const topics = [...new Set(readingData.filter(d => d.level === level).map(d => d.topic))];
+            
+            if (topics.length > 0) {
+                selectTopic(topics[0]); 
+            } else {
+                currentTopic = '';
+            }
+            renderTopicList(topics);
+        }
+
+        function renderTopicList(topics) {
+            const container = document.getElementById('topicList');
+            container.innerHTML = '';
+            
+            topics.forEach(topic => {
+                const li = document.createElement('li');
+                li.className = `topic-item ${topic === currentTopic ? 'active' : ''}`;
+                li.textContent = topic;
+                li.onclick = () => {
+                    selectTopic(topic);
+                    renderTopicList(topics); 
+                };
+                container.appendChild(li);
+            });
+        }
+
+        function selectTopic(topic) {
+            currentTopic = topic;
+            stopAudio(); // 切换专题时强制停止音频
+            renderCards();
+        }
+
+        // --- 全新音频控制逻辑 ---
+        
+        // 统一停止音频并重置所有 UI 状态
+        function stopAudio() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+            currentPlayingId = null;
+
+            // 移除所有卡片的高亮状态
+            document.querySelectorAll('.card').forEach(card => card.classList.remove('playing'));
+            
+            // 将所有按钮恢复为“播放”状态
+            document.querySelectorAll('.play-btn').forEach(btn => {
+                btn.textContent = '▶ 播放';
+                btn.classList.remove('playing-state');
+            });
+        }
+
+        // 播放/停止 切换逻辑
+        function toggleAudio(level, id, btnElement) {
+            // 如果点击的是当前正在播放的按钮，则执行停止操作
+            if (currentPlayingId === id && currentAudio && !currentAudio.paused) {
+                stopAudio();
+                return;
+            }
+
+            // 如果点击了新的句子，先停止之前的
+            stopAudio();
+
+            // 拼装路径并播放新的音频
+            const audioPath = `./audio/${level}/T${id}.mp3`;
+            currentAudio = new Audio(audioPath);
+            currentPlayingId = id;
+
+            // 更新当前卡片和按钮的 UI 状态
+            const card = btnElement.closest('.card');
+            card.classList.add('playing');
+            btnElement.textContent = '⏹ 停止';
+            btnElement.classList.add('playing-state');
+
+            currentAudio.play().catch(error => {
+                alert(`无法播放音频。\n请检查文件是否存在: ${audioPath}`);
+                stopAudio();
+                console.error("Audio playback error:", error);
+            });
+
+            // 音频播放自然结束时，恢复状态
+            currentAudio.onended = () => {
+                stopAudio();
+            };
+        }
+
+        function renderCards() {
+            const container = document.getElementById('cardContainer');
+            const titleEl = document.getElementById('currentSelectionTitle');
+            const countEl = document.getElementById('sentenceCount');
+            
+            container.innerHTML = '';
+            titleEl.textContent = `${currentLevel} - ${currentTopic}`;
+
+            const filteredData = readingData.filter(d => d.level === currentLevel && d.topic === currentTopic);
+            countEl.textContent = `共 ${filteredData.length} 句`;
+
+            filteredData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                const formattedContent = item.content.replace(/\n/g, '<br>');
+
+                // 改为左右布局：左边是序号和按钮，右边是文字内容
+                card.innerHTML = `
+                    <div class="card-left">
+                        <span class="sentence-id">No. ${item.id}</span>
+                        <button class="play-btn" onclick="toggleAudio('${item.level}', ${item.id}, this)">
+                            ▶ 播放
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        ${formattedContent}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
