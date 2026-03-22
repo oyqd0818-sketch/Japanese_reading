@@ -356,23 +356,26 @@
             renderGachaCard();
         }
 
-        // --- 文本格式化引擎 ---
+      // --- 文本格式化引擎 ---
         function formatContent(text) {
-            // 先处理原本的换行符
-            let formatted = text.replace(/\n/g, '<br>');
-            
             // 判断是否包含对话标记 (支持全半角冒号)
             if (/(A|B|C|Ａ|Ｂ|Ｃ)[：:]/.test(text)) {
+                // 对话模式：保留原文本的换行，并高亮角色
+                let formatted = text.replace(/\n/g, '<br>');
                 formatted = formatted.replace(/(A|Ａ)[：:]/g, '<span class="speaker-a">A：</span>');
                 formatted = formatted.replace(/(B|Ｂ)[：:]/g, '<span class="speaker-b">B：</span>');
                 formatted = formatted.replace(/(C|Ｃ)[：:]/g, '<span class="speaker-c">C：</span>');
+                return formatted;
             } else {
-                // 非对话状态，把句号替换为句号+强制双换行，打散段落
-                formatted = formatted.replace(/。/g, '。<br><br>');
-                // 清理可能因为结尾句号产生的多余空行
+                // 非对话的普通段落模式：
+                // 1. 先清除文本原有的换行符，防止排版冲突
+                let formatted = text.replace(/\n/g, '');
+                // 2. 在每个句号后面只加一个 <br> 实现紧凑换行
+                formatted = formatted.replace(/。/g, '。<br>');
+                // 3. 清理结尾可能多出的换行符
                 formatted = formatted.replace(/(<br>)+$/g, '');
+                return formatted;
             }
-            return formatted;
         }
 
         // --- 渲染 UI ---
@@ -445,7 +448,7 @@
             }
         }
 
-        function createCardHTML(item, index) {
+       function createCardHTML(item, index) {
             const div = document.createElement('div');
             div.className = 'card';
             div.id = `card-${item.id}`;
@@ -460,10 +463,13 @@
                     <div class="card-text">${formattedContent}</div>
                 `;
             } else {
+                // 单句沉浸与抽卡模式：将播放按钮移至序号右侧，并增加一条虚线分割线提升质感
                 div.innerHTML = `
-                    <span class="sentence-id">No. ${item.id}</span>
-                    <div class="card-text" style="font-size: 1.5rem; margin: 10px 0;">${formattedContent}</div>
-                    <button id="btn-${item.id}" class="play-btn" style="width: 140px; font-size: 1.1rem; padding: 12px; align-self: flex-start;" onclick="playAudio(${item.id}, ${index})">▶ 播放</button>
+                    <div style="display: flex; align-items: center; gap: 15px; width: 100%; border-bottom: 1px dashed #e2e8f0; padding-bottom: 15px; margin-bottom: 10px;">
+                        <span class="sentence-id" style="font-size: 1rem; padding: 6px 14px; margin: 0;">No. ${item.id}</span>
+                        <button id="btn-${item.id}" class="play-btn" style="margin: 0; width: auto; padding: 8px 18px;" onclick="playAudio(${item.id}, ${index})">▶ 播放</button>
+                    </div>
+                    <div class="card-text" style="font-size: 1.5rem; line-height: 1.8;">${formattedContent}</div>
                 `;
             }
             return div;
