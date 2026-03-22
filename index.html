@@ -344,261 +344,258 @@
     <script src="data.js"></script>
     
     <script>
-        // --- 核心状态 ---
-        let state = {
-            level: 'N1',
-            topic: '',
-            viewMode: 'list', // 'list' | 'single'
-            settings: { blind: false, autoPlay: false, random: false },
-            filteredData: [],
-            currentIndex: 0, // 用于单句模式和连播逻辑
-            playingId: null
-        };
-        
-        let currentAudio = null;
+// --- 核心状态 ---
+let state = {
+    level: 'N1',
+    topic: '',
+    viewMode: 'list', // 'list' | 'single'
+    settings: { blind: false, autoPlay: false, random: false },
+    filteredData: [],
+    currentIndex: 0, 
+    playingId: null
+};
 
-        // --- 初始化 ---
-        function init() {
-            renderLevelSelectors();
-            selectLevel('N1'); 
+let currentAudio = null;
+
+// --- 初始化 ---
+function init() {
+    renderLevelSelectors();
+    selectLevel('N1'); 
+}
+
+// --- 侧边栏逻辑 ---
+function renderLevelSelectors() {
+    const levels = ['N1', 'N2', 'N3'];
+    const container = document.getElementById('levelSelector');
+    container.innerHTML = '';
+    levels.forEach(l => {
+        const btn = document.createElement('button');
+        btn.className = `level-btn ${l === state.level ? 'active' : ''}`;
+        btn.textContent = l;
+        btn.onclick = () => selectLevel(l);
+        container.appendChild(btn);
+    });
+}
+
+function selectLevel(l) {
+    state.level = l;
+    renderLevelSelectors();
+    const topics = [...new Set(readingData.filter(d => d.level === l).map(d => d.topic))];
+    if (topics.length > 0) selectTopic(topics[0]); 
+    renderTopicList(topics);
+}
+
+function renderTopicList(topics) {
+    const container = document.getElementById('topicList');
+    container.innerHTML = '';
+    topics.forEach(t => {
+        const li = document.createElement('li');
+        li.className = `topic-item ${t === state.topic ? 'active' : ''}`;
+        li.textContent = t;
+        li.onclick = () => { selectTopic(t); renderTopicList(topics); };
+        container.appendChild(li);
+    });
+}
+
+function selectTopic(t) {
+    state.topic = t;
+    state.filteredData = readingData.filter(d => d.level === state.level && d.topic === state.topic);
+    state.currentIndex = 0; 
+    stopAudio();
+    renderContent();
+}
+
+// --- 控制台设置逻辑 ---
+function toggleSetting(key) {
+    state.settings[key] = !state.settings[key];
+    const btn = document.getElementById(
+        key === 'blind' ? 'btnBlind' : 
+        key === 'autoPlay' ? 'btnAutoPlay' : 'btnRandom'
+    );
+    btn.classList.toggle('active', state.settings[key]);
+    
+    if (key === 'blind') {
+        document.getElementById('cardContainer').classList.toggle('blind-mode', state.settings.blind);
+    }
+}
+
+function switchView(mode) {
+    if (state.viewMode === mode) return;
+    state.viewMode = mode;
+    document.getElementById('btnViewList').classList.toggle('active', mode === 'list');
+    document.getElementById('btnViewSingle').classList.toggle('active', mode === 'single');
+    
+    if (state.playingId) {
+        const idx = state.filteredData.findIndex(item => item.id === state.playingId);
+        if (idx !== -1) state.currentIndex = idx;
+    }
+    renderContent();
+    
+    if (state.playingId) updatePlayingUI(state.playingId, true);
+}
+
+// --- 核心播放逻辑 ---
+function stopAudio() {
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        currentAudio = null;
+    }
+    if (state.playingId) {
+        updatePlayingUI(state.playingId, false);
+        state.playingId = null;
+    }
+}
+
+function playAudio(id, index) {
+    if (state.playingId === id && currentAudio && !currentAudio.paused) {
+        stopAudio(); 
+        return;
+    }
+    stopAudio();
+
+    state.playingId = id;
+    state.currentIndex = index; 
+    
+    updatePlayingUI(id, true);
+
+    const audioPath = `./audio/${state.level}/T${id}.mp3`;
+    currentAudio = new Audio(audioPath);
+    
+    currentAudio.play().catch(err => {
+        alert(`无法播放音频: ${audioPath}`);
+        stopAudio();
+    });
+
+    // 播放结束后的逻辑
+    currentAudio.onended = () => {
+        updatePlayingUI(id, false);
+        state.playingId = null;
+
+        // 只有开启了自动连播，且当前音频自然结束时，才自动触发下一句的音频
+        if (state.settings.autoPlay) {
+            playNext(true); 
         }
+    };
+}
 
-        // --- 侧边栏逻辑 ---
-        function renderLevelSelectors() {
-            const levels = ['N1', 'N2', 'N3'];
-            const container = document.getElementById('levelSelector');
-            container.innerHTML = '';
-            levels.forEach(l => {
-                const btn = document.createElement('button');
-                btn.className = `level-btn ${l === state.level ? 'active' : ''}`;
-                btn.textContent = l;
-                btn.onclick = () => selectLevel(l);
-                container.appendChild(btn);
-            });
-        }
-
-        function selectLevel(l) {
-            state.level = l;
-            renderLevelSelectors();
-            const topics = [...new Set(readingData.filter(d => d.level === l).map(d => d.topic))];
-            if (topics.length > 0) selectTopic(topics[0]); 
-            renderTopicList(topics);
-        }
-
-        function renderTopicList(topics) {
-            const container = document.getElementById('topicList');
-            container.innerHTML = '';
-            topics.forEach(t => {
-                const li = document.createElement('li');
-                li.className = `topic-item ${t === state.topic ? 'active' : ''}`;
-                li.textContent = t;
-                li.onclick = () => { selectTopic(t); renderTopicList(topics); };
-                container.appendChild(li);
-            });
-        }
-
-        function selectTopic(t) {
-            state.topic = t;
-            state.filteredData = readingData.filter(d => d.level === state.level && d.topic === state.topic);
-            state.currentIndex = 0; // 重置进度
-            stopAudio();
-            renderContent();
-        }
-
-        // --- 控制台设置逻辑 ---
-        function toggleSetting(key) {
-            state.settings[key] = !state.settings[key];
-            const btn = document.getElementById(
-                key === 'blind' ? 'btnBlind' : 
-                key === 'autoPlay' ? 'btnAutoPlay' : 'btnRandom'
-            );
-            btn.classList.toggle('active', state.settings[key]);
-            
-            // 实时应用盲听样式
-            if (key === 'blind') {
-                document.getElementById('cardContainer').classList.toggle('blind-mode', state.settings.blind);
-            }
-        }
-
-        function switchView(mode) {
-            if (state.viewMode === mode) return;
-            state.viewMode = mode;
-            document.getElementById('btnViewList').classList.toggle('active', mode === 'list');
-            document.getElementById('btnViewSingle').classList.toggle('active', mode === 'single');
-            
-            // 切换视图时，如果正在播放，尝试定位到正在播放的句子
-            if (state.playingId) {
-                const idx = state.filteredData.findIndex(item => item.id === state.playingId);
-                if (idx !== -1) state.currentIndex = idx;
-            }
-            renderContent();
-            
-            // 恢复高亮UI
-            if (state.playingId) updatePlayingUI(state.playingId, true);
-        }
-
-        // --- 核心播放逻辑 ---
-        function stopAudio() {
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio.currentTime = 0;
-                currentAudio = null;
-            }
-            if (state.playingId) {
-                updatePlayingUI(state.playingId, false);
-                state.playingId = null;
-            }
-        }
-
-        function playAudio(id, index) {
-            if (state.playingId === id && currentAudio && !currentAudio.paused) {
-                stopAudio(); // 再次点击当前播放的即为停止
-                return;
-            }
-            stopAudio();
-
-            state.playingId = id;
-            state.currentIndex = index; // 同步当前索引
-            
-            updatePlayingUI(id, true);
-
-            const audioPath = `./audio/${state.level}/T${id}.mp3`;
-            currentAudio = new Audio(audioPath);
-            
-            currentAudio.play().catch(err => {
-                alert(`无法播放音频: ${audioPath}`);
-                stopAudio();
-            });
-
-            // 播放结束后的连播逻辑
-            currentAudio.onended = () => {
-                updatePlayingUI(id, false);
-                state.playingId = null;
-
-                if (state.settings.autoPlay) {
-                    playNext();
-                }
-            };
-        }
-
-        function playNext() {
-            if (state.filteredData.length === 0) return;
-            
-            let nextIndex = state.currentIndex;
-            if (state.settings.random) {
-                // 随机抽取一个不同于当前的句子
-                do {
-                    nextIndex = Math.floor(Math.random() * state.filteredData.length);
-                } while (nextIndex === state.currentIndex && state.filteredData.length > 1);
-            } else {
-                nextIndex = (state.currentIndex + 1) % state.filteredData.length;
-            }
-            
-            state.currentIndex = nextIndex;
-            const nextItem = state.filteredData[nextIndex];
-            
-            // 如果在单句模式下，需要先重新渲染卡片
-            if (state.viewMode === 'single') renderContent();
-            
-            // 延迟极短时间确保DOM渲染完成，再触发播放
-            setTimeout(() => {
-                playAudio(nextItem.id, nextIndex);
-                // 列表模式下自动滚动到可视区域
-                if (state.viewMode === 'list') {
-                    const card = document.getElementById(`card-${nextItem.id}`);
-                    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }, 50);
-        }
-
-        function playPrev() {
-            if (state.filteredData.length === 0) return;
-            let prevIndex = state.currentIndex - 1;
-            if (prevIndex < 0) prevIndex = state.filteredData.length - 1;
-            
-            state.currentIndex = prevIndex;
-            const prevItem = state.filteredData[prevIndex];
-            
-            if (state.viewMode === 'single') renderContent();
-            setTimeout(() => playAudio(prevItem.id, prevIndex), 50);
-        }
-
-        // --- 渲染 UI ---
-        function updatePlayingUI(id, isPlaying) {
-            const card = document.getElementById(`card-${id}`);
-            const btn = document.getElementById(`btn-${id}`);
-            if (!card || !btn) return;
-
-            if (isPlaying) {
-                card.classList.add('playing');
-                btn.textContent = '⏹ 停止';
-                btn.classList.add('playing-state');
-            } else {
-                card.classList.remove('playing');
-                btn.textContent = '▶ 播放';
-                btn.classList.remove('playing-state');
-            }
-        }
-
-        function renderContent() {
-            const container = document.getElementById('cardContainer');
-            document.getElementById('currentSelectionTitle').textContent = `${state.level} - ${state.topic}`;
-            document.getElementById('sentenceCount').textContent = `共 ${state.filteredData.length} 句`;
-            
-            // 应用盲听类名
-            container.className = state.viewMode === 'list' ? 'list-view' : 'single-view';
-            if (state.settings.blind) container.classList.add('blind-mode');
-            
-            container.innerHTML = '';
-
+// 修复 Bug：增加 isAuto 标识。默认为 false（即手动点击，不播声音）
+function playNext(isAuto = false) {
+    if (state.filteredData.length === 0) return;
+    
+    let nextIndex = state.currentIndex;
+    if (state.settings.random) {
+        do {
+            nextIndex = Math.floor(Math.random() * state.filteredData.length);
+        } while (nextIndex === state.currentIndex && state.filteredData.length > 1);
+    } else {
+        nextIndex = (state.currentIndex + 1) % state.filteredData.length;
+    }
+    
+    state.currentIndex = nextIndex;
+    const nextItem = state.filteredData[nextIndex];
+    
+    // 翻页前强制停止当前可能正在播放的音频
+    stopAudio();
+    
+    if (state.viewMode === 'single') renderContent();
+    
+    if (isAuto) {
+        // 如果是连播触发的，才自动播放声音
+        setTimeout(() => {
+            playAudio(nextItem.id, nextIndex);
             if (state.viewMode === 'list') {
-                state.filteredData.forEach((item, index) => {
-                    container.appendChild(createCardHTML(item, index));
-                });
-            } else {
-                // 单句模式只渲染当前索引的一句
-                if (state.filteredData.length > 0) {
-                    const item = state.filteredData[state.currentIndex];
-                    container.appendChild(createCardHTML(item, state.currentIndex));
-                    
-                    // 增加底部导航按钮
-                    const navDiv = document.createElement('div');
-                    navDiv.className = 'single-nav-btns';
-                    navDiv.innerHTML = `
-                        <button class="nav-btn" onclick="playPrev()">← 上一句</button>
-                        <button class="nav-btn" onclick="playNext()">下一句 →</button>
-                    `;
-                    container.appendChild(navDiv);
-                }
+                const card = document.getElementById(`card-${nextItem.id}`);
+                if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
+        }, 50);
+    }
+}
+
+function playPrev() {
+    if (state.filteredData.length === 0) return;
+    let prevIndex = state.currentIndex - 1;
+    if (prevIndex < 0) prevIndex = state.filteredData.length - 1;
+    
+    state.currentIndex = prevIndex;
+    
+    stopAudio(); // 翻页前强制停止音频
+    if (state.viewMode === 'single') renderContent();
+    // 上一句纯手动操作，不需要触发声音
+}
+
+// --- 渲染 UI ---
+function updatePlayingUI(id, isPlaying) {
+    const card = document.getElementById(`card-${id}`);
+    const btn = document.getElementById(`btn-${id}`);
+    if (!card || !btn) return;
+
+    if (isPlaying) {
+        card.classList.add('playing');
+        btn.textContent = '⏹ 停止';
+        btn.classList.add('playing-state');
+    } else {
+        card.classList.remove('playing');
+        btn.textContent = '▶ 播放';
+        btn.classList.remove('playing-state');
+    }
+}
+
+function renderContent() {
+    const container = document.getElementById('cardContainer');
+    document.getElementById('currentSelectionTitle').textContent = `${state.level} - ${state.topic}`;
+    document.getElementById('sentenceCount').textContent = `共 ${state.filteredData.length} 句`;
+    
+    container.className = state.viewMode === 'list' ? 'list-view' : 'single-view';
+    if (state.settings.blind) container.classList.add('blind-mode');
+    
+    container.innerHTML = '';
+
+    if (state.viewMode === 'list') {
+        state.filteredData.forEach((item, index) => {
+            container.appendChild(createCardHTML(item, index));
+        });
+    } else {
+        if (state.filteredData.length > 0) {
+            const item = state.filteredData[state.currentIndex];
+            container.appendChild(createCardHTML(item, state.currentIndex));
+            
+            const navDiv = document.createElement('div');
+            navDiv.className = 'single-nav-btns';
+            navDiv.innerHTML = `
+                <button class="nav-btn" onclick="playPrev()">← 上一句</button>
+                <button class="nav-btn" onclick="playNext()">下一句 →</button>
+            `;
+            container.appendChild(navDiv);
         }
+    }
+}
 
-        function createCardHTML(item, index) {
-            const div = document.createElement('div');
-            div.className = 'card';
-            div.id = `card-${item.id}`;
-            const formattedContent = item.content.replace(/\n/g, '<br>');
+function createCardHTML(item, index) {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.id = `card-${item.id}`;
+    const formattedContent = item.content.replace(/\n/g, '<br>');
 
-            if (state.viewMode === 'list') {
-                div.innerHTML = `
-                    <div class="card-left">
-                        <span class="sentence-id">No. ${item.id}</span>
-                        <button id="btn-${item.id}" class="play-btn" onclick="playAudio(${item.id}, ${index})">▶ 播放</button>
-                    </div>
-                    <div class="card-text">${formattedContent}</div>
-                `;
-            } else {
-                // 单句卡片的垂直居中布局
-                div.innerHTML = `
-                    <span class="sentence-id">No. ${item.id}</span>
-                    <div class="card-text" style="font-size: 1.5rem; margin: 20px 0;">${formattedContent}</div>
-                    <button id="btn-${item.id}" class="play-btn" style="width: 140px; font-size: 1.1rem; padding: 12px;" onclick="playAudio(${item.id}, ${index})">▶ 播放</button>
-                `;
-            }
-            return div;
-        }
+    if (state.viewMode === 'list') {
+        div.innerHTML = `
+            <div class="card-left">
+                <span class="sentence-id">No. ${item.id}</span>
+                <button id="btn-${item.id}" class="play-btn" onclick="playAudio(${item.id}, ${index})">▶ 播放</button>
+            </div>
+            <div class="card-text">${formattedContent}</div>
+        `;
+    } else {
+        div.innerHTML = `
+            <span class="sentence-id">No. ${item.id}</span>
+            <div class="card-text" style="font-size: 1.5rem; margin: 20px 0;">${formattedContent}</div>
+            <button id="btn-${item.id}" class="play-btn" style="width: 140px; font-size: 1.1rem; padding: 12px;" onclick="playAudio(${item.id}, ${index})">▶ 播放</button>
+        `;
+    }
+    return div;
+}
 
-        window.onload = init;
+window.onload = init;
     </script>
 </body>
 </html>
