@@ -64,21 +64,41 @@
         .card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid var(--border-color); transition: all 0.2s ease; position: relative; }
         .card.playing { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2); background-color: var(--playing-bg); }
 
-/* 盲听模式模糊效果（修改为点击解锁交互） */
+        /* 盲听模式模糊效果 */
         .blind-mode .card-text { 
             filter: blur(8px); 
             opacity: 0.6; 
             transition: all 0.3s ease; 
-            cursor: pointer; 
-            user-select: none; 
         }
         
-        /* 新增：当文本被点击附加 revealed 类名时，展示清晰文本 */
+        /* 文本解盲后的清晰状态（确保可以划选复制） */
         .blind-mode .card-text.revealed { 
             filter: blur(0); 
             opacity: 1; 
-            cursor: text; 
-            user-select: auto; 
+            user-select: text; 
+        }
+
+        /* 独立的解盲按钮样式（默认隐藏） */
+        .reveal-btn {
+            display: none;
+            background-color: #ffffff;
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .reveal-btn:hover {
+            background-color: #f1f5f9;
+            color: var(--text-main);
+            border-color: #cbd5e1;
+        }
+        
+        /* 只有在盲听模式开启时，解盲按钮才显示 */
+        .blind-mode .reveal-btn {
+            display: block;
         }
 
         /* --- 视图布局调整 --- */
@@ -91,7 +111,7 @@
             padding: 40px; 
             display: flex; 
             flex-direction: column; 
-            align-items: flex-start; /* 改为左对齐 */
+            align-items: flex-start; 
             gap: 20px; 
         }
         
@@ -225,7 +245,6 @@
             state.currentIndex = 0; 
             stopAudio();
 
-            // 如果在抽卡模式下点击了具体专题，自动切回单句沉浸模式
             if (state.viewMode === 'gacha') {
                 switchView('single');
             } else {
@@ -253,7 +272,6 @@
             document.getElementById('btnViewSingle').classList.toggle('active', mode === 'single');
             document.getElementById('btnViewGacha').classList.toggle('active', mode === 'gacha');
             
-            // 抽卡模式禁用常规控制台按钮
             const isGacha = mode === 'gacha';
             document.getElementById('btnBlind').disabled = isGacha;
             document.getElementById('btnAutoPlay').disabled = isGacha;
@@ -305,7 +323,6 @@
                 updatePlayingUI(id, false);
                 state.playingId = null;
                 
-                // 仅在非抽卡且开启连播时自动下一句
                 if (state.viewMode !== 'gacha' && state.settings.autoPlay) {
                     playNext(true); 
                 }
@@ -356,39 +373,44 @@
             stopAudio();
             isGachaBlind = isBlind;
             
-            // 在当前大等级（如 N1）的全部库中随机抽取
             const levelData = readingData.filter(d => d.level === state.level);
             if (levelData.length === 0) return;
 
             const randomIndex = Math.floor(Math.random() * levelData.length);
             gachaItem = levelData[randomIndex];
 
-            // 更新标题栏信息
             document.getElementById('currentSelectionTitle').innerHTML = `🎲 全域抽卡 <span style="font-size: 1rem; color: #7f8c8d; font-weight: normal; margin-left: 10px;">来源专题: ${gachaItem.topic}</span>`;
             document.getElementById('sentenceCount').textContent = `题库总量: ${levelData.length} 句`;
 
             renderGachaCard();
         }
 
-      // --- 文本格式化引擎 ---
+        // --- 文本格式化引擎 ---
         function formatContent(text) {
-            // 判断是否包含对话标记 (支持全半角冒号)
             if (/(A|B|C|Ａ|Ｂ|Ｃ)[：:]/.test(text)) {
-                // 对话模式：保留原文本的换行，并高亮角色
                 let formatted = text.replace(/\n/g, '<br>');
                 formatted = formatted.replace(/(A|Ａ)[：:]/g, '<span class="speaker-a">A：</span>');
                 formatted = formatted.replace(/(B|Ｂ)[：:]/g, '<span class="speaker-b">B：</span>');
                 formatted = formatted.replace(/(C|Ｃ)[：:]/g, '<span class="speaker-c">C：</span>');
                 return formatted;
             } else {
-                // 非对话的普通段落模式：
-                // 1. 先清除文本原有的换行符，防止排版冲突
                 let formatted = text.replace(/\n/g, '');
-                // 2. 在每个句号后面只加一个 <br> 实现紧凑换行
                 formatted = formatted.replace(/。/g, '。<br>');
-                // 3. 清理结尾可能多出的换行符
                 formatted = formatted.replace(/(<br>)+$/g, '');
                 return formatted;
+            }
+        }
+
+        // --- 独立的解盲切换逻辑 ---
+        function toggleReveal(id, btnElement) {
+            const textEl = document.getElementById(`text-${id}`);
+            if (!textEl) return;
+            
+            const isRevealed = textEl.classList.toggle('revealed');
+            if (isRevealed) {
+                btnElement.textContent = '🙈 遮蔽';
+            } else {
+                btnElement.textContent = '👁️ 解盲';
             }
         }
 
@@ -462,7 +484,7 @@
             }
         }
 
-     function createCardHTML(item, index) {
+        function createCardHTML(item, index) {
             const div = document.createElement('div');
             div.className = 'card';
             div.id = `card-${item.id}`;
@@ -473,16 +495,18 @@
                     <div class="card-left">
                         <span class="sentence-id">No. ${item.id}</span>
                         <button id="btn-${item.id}" class="play-btn" onclick="playAudio(${item.id}, ${index})">▶ 播放</button>
+                        <button class="reveal-btn" onclick="toggleReveal(${item.id}, this)">👁️ 解盲</button>
                     </div>
-                    <div class="card-text" onclick="this.classList.toggle('revealed')">${formattedContent}</div>
+                    <div class="card-text" id="text-${item.id}">${formattedContent}</div>
                 `;
             } else {
                 div.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 15px; width: 100%; border-bottom: 1px dashed #e2e8f0; padding-bottom: 15px; margin-bottom: 10px;">
                         <span class="sentence-id" style="font-size: 1rem; padding: 6px 14px; margin: 0;">No. ${item.id}</span>
                         <button id="btn-${item.id}" class="play-btn" style="margin: 0; width: auto; padding: 8px 18px;" onclick="playAudio(${item.id}, ${index})">▶ 播放</button>
+                        <button class="reveal-btn" style="margin: 0; padding: 8px 18px;" onclick="toggleReveal(${item.id}, this)">👁️ 解盲</button>
                     </div>
-                    <div class="card-text" style="font-size: 1.5rem; line-height: 1.8;" onclick="this.classList.toggle('revealed')">${formattedContent}</div>
+                    <div class="card-text" id="text-${item.id}" style="font-size: 1.5rem; line-height: 1.8;">${formattedContent}</div>
                 `;
             }
             return div;
