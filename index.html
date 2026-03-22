@@ -64,8 +64,22 @@
         .card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid var(--border-color); transition: all 0.2s ease; position: relative; }
         .card.playing { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2); background-color: var(--playing-bg); }
 
-        .blind-mode .card-text { filter: blur(8px); opacity: 0.6; transition: all 0.3s ease; cursor: pointer; user-select: none; }
-        .blind-mode .card-text:hover, .blind-mode .card-text:active { filter: blur(0); opacity: 1; }
+/* 盲听模式模糊效果（修改为点击解锁交互） */
+        .blind-mode .card-text { 
+            filter: blur(8px); 
+            opacity: 0.6; 
+            transition: all 0.3s ease; 
+            cursor: pointer; 
+            user-select: none; 
+        }
+        
+        /* 新增：当文本被点击附加 revealed 类名时，展示清晰文本 */
+        .blind-mode .card-text.revealed { 
+            filter: blur(0); 
+            opacity: 1; 
+            cursor: text; 
+            user-select: auto; 
+        }
 
         /* --- 视图布局调整 --- */
         .list-view { display: flex; flex-direction: column; gap: 16px; }
@@ -448,7 +462,7 @@
             }
         }
 
-       function createCardHTML(item, index) {
+     function createCardHTML(item, index) {
             const div = document.createElement('div');
             div.className = 'card';
             div.id = `card-${item.id}`;
@@ -460,16 +474,15 @@
                         <span class="sentence-id">No. ${item.id}</span>
                         <button id="btn-${item.id}" class="play-btn" onclick="playAudio(${item.id}, ${index})">▶ 播放</button>
                     </div>
-                    <div class="card-text">${formattedContent}</div>
+                    <div class="card-text" onclick="this.classList.toggle('revealed')">${formattedContent}</div>
                 `;
             } else {
-                // 单句沉浸与抽卡模式：将播放按钮移至序号右侧，并增加一条虚线分割线提升质感
                 div.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 15px; width: 100%; border-bottom: 1px dashed #e2e8f0; padding-bottom: 15px; margin-bottom: 10px;">
                         <span class="sentence-id" style="font-size: 1rem; padding: 6px 14px; margin: 0;">No. ${item.id}</span>
                         <button id="btn-${item.id}" class="play-btn" style="margin: 0; width: auto; padding: 8px 18px;" onclick="playAudio(${item.id}, ${index})">▶ 播放</button>
                     </div>
-                    <div class="card-text" style="font-size: 1.5rem; line-height: 1.8;">${formattedContent}</div>
+                    <div class="card-text" style="font-size: 1.5rem; line-height: 1.8;" onclick="this.classList.toggle('revealed')">${formattedContent}</div>
                 `;
             }
             return div;
